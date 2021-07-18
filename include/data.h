@@ -17,8 +17,8 @@
 #include "processing.h"
 #include "loaddata.h"
 
-#include "utils/includespdlog.h"
-#include "utils/configreader.h"
+#include "includespdlog.h"
+#include "configreader.h"
 
 
 class DataMemory : public QObject {

@@ -17,8 +17,8 @@
 #include "processing.h"
 #include "graph.h"
 
-#include "utils/includespdlog.h"
-#include "utils/configreader.h"
+#include "includespdlog.h"
+#include "configreader.h"
 
 #ifdef _WIN32
 #endif // _WIN32
