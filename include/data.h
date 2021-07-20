@@ -16,10 +16,17 @@
 
 #include "processing.h"
 #include "loaddata.h"
+#include "graph.h"
+#include "foldermanagement.h"
 
 #include "includespdlog.h"
 #include "configreader.h"
 
+struct image_info
+{
+    std::string image_filename;
+    std::string gt_filename;
+};
 
 class DataMemory : public QObject {
   Q_OBJECT
@@ -43,14 +50,18 @@ public:
 	bool checkIfReturnData(const QJsonArray _nextActive);
 	void loadInputs(const QJsonArray _prevActive, std::vector<_data> & dataVec);
 	void returnData(int i, std::vector<cv::Mat> & m_outputData);
+	bool loadNamesOfFile();
+
+public: // get/set
+	std::vector<struct image_info> get_imageInfo() { return m_imageInfo; }
 
 private:
 	void loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv::Mat>& m_cleanData, bool resize);
 	void loadConfig(QJsonObject const& a_config);
-	QVector<QString> scanAllImages(QString path);
 	void loadDataFromStreamWindows(std::vector<cv::Mat> &data, bool resize);
 	void loadDataLinux(QJsonObject a_config);
 	void createSplit();
+	
 
 signals:
   void memoryLoaded();
@@ -86,6 +97,7 @@ private:
 
 	Graph<Processing, _data> m_graph_processing;
 	LoadData m_loadData;
+	std::vector<struct image_info>  m_imageInfo;
 
 	bool m_loaded{};
 	bool m_resize{};
@@ -94,6 +106,7 @@ private:
 	QJsonObject m_datasetConfig;
 	QString m_cleanTrain{};
 	QString m_gtTrain{};
+	int m_trainNumber{};
 
 };
 
