@@ -39,6 +39,8 @@ constexpr auto DATASET_UNIX{ "DatasetLinux" };
 constexpr auto DATASET_WIN32{ "DatasetWin32" };
 constexpr auto CLEAN_TRAIN{ "Clean_train" };
 constexpr auto GT_TRAIN{ "Gt_train" };
+
+constexpr auto TRAIN_NUMBER{ "TrainNumber" };
 constexpr auto SAVE_PREPROCESSING_DATASET{ "SavePreprocessingDataset" };
 
 
@@ -73,6 +75,10 @@ void DataMemory::clearDataForNextIteration()
 
 void DataMemory::loadConfig(QJsonObject const& a_config)
 {
+	#ifdef DEBUG
+	Logger->debug("DataMemory::loadConfig()");
+	qDebug() << "DataMemory::loadConfig() config:"<< a_config;
+	#endif
 	m_savePreprocessingDataset = a_config[SAVE_PREPROCESSING_DATASET].toBool();
 	#ifdef _WIN32
 	m_split = "\\";
@@ -106,6 +112,37 @@ void DataMemory::loadConfig(QJsonObject const& a_config)
 	m_outputType = datasetConfig[OUTPUT_TYPE].toString();
 	m_cleanTrain = datasetConfig[CLEAN_TRAIN].toString();
 	m_gtTrain = datasetConfig[GT_TRAIN].toString();
+	m_trainNumber = datasetConfig[TRAIN_NUMBER].toInt();
+	checkAndCreateFolder(m_pathToConfig+m_cleanTrain);
+	checkAndCreateFolder(m_pathToConfig+m_gtTrain);
+
+	#ifdef DEBUG
+	Logger->debug("DataMemory::loadConfig() done");
+	#endif
+}
+
+bool DataMemory::loadNamesOfFile()
+{
+	QVector<QString> m_imgList = scanAllImages(m_pathToConfig+m_cleanTrain);
+	std::sort(m_imgList.begin(), m_imgList.end());
+	Logger->trace("m_imgList:{}", m_imgList.size());
+	if (m_imgList.size() > 0) {
+		for (qint32 iteration = 0; iteration < m_imgList.size(); iteration++) {
+			if (iteration % 10000 == 0)
+			{
+				spdlog::info("iteration:{}", iteration);
+			}
+
+			QString name = m_pathToConfig + m_cleanTrain + m_split + m_imgList[iteration] + m_inputType;
+			QString gt = m_pathToConfig + m_gtTrain + m_split + m_imgList[iteration] + m_inputType;
+			if (iteration < m_trainNumber)
+			{
+				m_imageInfo.push_back({ name.toStdString(), gt.toStdString() });
+			}
+			
+		}
+	}
+	return true;
 }
 
 bool DataMemory::preprocess(QJsonArray dataGraph)

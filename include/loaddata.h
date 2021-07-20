@@ -25,6 +25,32 @@
 #ifdef __linux__
 #endif // _UNIX
 
+QVector<QString> static scanAllImages(QString path)
+{
+    QVector<QString> temp;
+    QDir directory(path);
+    QStringList images = directory.entryList(QStringList() << "*.jpg" << "*.png" << "*.PNG" << "*.JPG", QDir::Files);
+
+    foreach(QString filename, images)
+    {
+        QStringList sl = filename.split(".");
+        temp.push_back(sl[0]);
+    }
+    return temp;
+}
+QVector<QString> static scanAllVideo(QString path)
+{
+    QVector<QString> temp;
+    QDir directory(path);
+    QStringList images = directory.entryList(QStringList() << "*.MP4" << "*.mp4", QDir::Files);
+
+    foreach(QString filename, images)
+    {
+        QStringList sl = filename.split(".");
+        temp.push_back(sl[0]);
+    }
+    return temp;
+}
 
 class LoadData : public QObject {
 	Q_OBJECT
@@ -44,7 +70,6 @@ private:
 	#ifdef _WIN32
 		void loadDataFromStreamWindows(QString path, std::vector<cv::Mat> &data, bool resize);
 		void loadDataWindows(std::vector<cv::Mat> &data, std::vector<cv::Mat> &gt);
-		QVector<QString> scanAllImages(QString path);
 	#endif // _WIN32
 
 private:

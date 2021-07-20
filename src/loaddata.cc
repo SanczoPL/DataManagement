@@ -31,6 +31,9 @@ LoadData::~LoadData(){}
 
 void LoadData::configure(QJsonObject const& a_config)
 {
+	#ifdef DEBUG
+	Logger->debug("LoadData::configure()");
+	#endif
 	#ifdef _WIN32
 	m_split = "\\";
 	#endif // _WIN32
@@ -64,6 +67,9 @@ void LoadData::configure(QJsonObject const& a_config)
 	m_outputType = datasetConfig[OUTPUT_TYPE].toString();
 	m_cleanTrain = datasetConfig[CLEAN_TRAIN].toString();
 	m_gtTrain = datasetConfig[GT_TRAIN].toString();
+	#ifdef DEBUG
+	Logger->debug("LoadData::configure() done");
+	#endif
 }
 
 bool LoadData::loadData(std::vector<cv::Mat> &data, std::vector<cv::Mat> &gt)
@@ -184,17 +190,5 @@ void LoadData::loadDataWindows(std::vector<cv::Mat> &data, std::vector<cv::Mat> 
 	loadDataFromStreamWindows(m_gt, gt, true);
 }
 
-QVector<QString> LoadData::scanAllImages(QString path)
-{
-    QVector<QString> temp;
-    QDir directory(path);
-    QStringList images = directory.entryList(QStringList() << "*.jpg" << "*.png" << "*.PNG" << "*.JPG", QDir::Files);
 
-    foreach(QString filename, images)
-    {
-        QStringList sl = filename.split(".");
-        temp.push_back(sl[0]);
-    }
-    return temp;
-}
 #endif
