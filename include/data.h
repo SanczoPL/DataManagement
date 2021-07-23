@@ -24,89 +24,90 @@
 
 struct image_info
 {
-    std::string image_filename;
-    std::string gt_filename;
+	std::string image_filename;
+	std::string gt_filename;
 };
 
-class DataMemory : public QObject {
-  Q_OBJECT
+class DataMemory : public QObject
+{
+	Q_OBJECT
 
-public:
-	explicit DataMemory();
-	~DataMemory();
-	void configure(QJsonObject const& a_config);
-	bool preprocess(QJsonArray m_dataGraph);
-	bool getLoad() { return m_loaded; };
+	public:
+		explicit DataMemory();
+		~DataMemory();
+		void configure(QJsonObject const& a_config);
+		bool preprocess(QJsonArray m_dataGraph);
+		bool loadNamesOfFile();
 
-	cv::Mat gt(qint32 i) { return m_gtData[i]; }
-	cv::Mat input(qint32 i) { return m_inputData[i]; }
+	public: // get/set
+		std::vector<struct image_info> get_imageInfoTrain() { return m_imageInfoTrain; }
+		std::vector<struct image_info> get_imageInfoTest() { return m_imageInfoTest; }
+		size_t getSizeCleanTrain() { return m_cleanTrain.size(); }
+		size_t getSizeGtTrain() { return m_gtTrain.size(); }
 
-	qint32 getSize() { return m_inputData.size(); }
-	qint32 getSizeGT() { return m_gtData.size(); }
+		size_t getSizeCleanTest() { return m_cleanTest.size(); }
+		size_t getSizeGtTest() { return m_gtTest.size(); }
+		
+		bool getLoad() { return m_loaded; };
+		cv::Mat gt(int i) { return m_gt[i]; }
+		cv::Mat clean(int i) { return m_clean[i]; }
 
-	void loadGraph(QJsonArray m_dataGraph);
-	void clearDataForNextIteration();
-	bool checkIfLoadInputs(const int i, const QJsonArray _prevActive, std::vector<_data> & dataVec, std::vector<cv::Mat> &input);
-	bool checkIfReturnData(const QJsonArray _nextActive);
-	void loadInputs(const QJsonArray _prevActive, std::vector<_data> & dataVec);
-	void returnData(int i, std::vector<cv::Mat> & m_outputData);
-	bool loadNamesOfFile();
 
-public: // get/set
-	std::vector<struct image_info> get_imageInfo() { return m_imageInfo; }
+	private:
+		void loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv::Mat>& m_cleanData, bool resize);
+		void loadConfig(QJsonObject const& a_config);
+		void loadDataFromStreamWindows(std::vector<cv::Mat> &data, bool resize);
+		void loadDataLinux(QJsonObject a_config);
+		void createSplit();
+		void loadGraph(QJsonArray m_dataGraph);
+		void clearDataForNextIteration();
 
-private:
-	void loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv::Mat>& m_cleanData, bool resize);
-	void loadConfig(QJsonObject const& a_config);
-	void loadDataFromStreamWindows(std::vector<cv::Mat> &data, bool resize);
-	void loadDataLinux(QJsonObject a_config);
-	void createSplit();
-	
+	signals:
+		void memoryLoaded();
 
-signals:
-  void memoryLoaded();
+	private:
+		std::vector<cv::Mat> m_clean;
+		std::vector<cv::Mat> m_gt;
+		std::vector<cv::Mat> m_cleanTrain;
+		std::vector<cv::Mat> m_cleanTest;
+		std::vector<cv::Mat> m_gtTrain;
+		std::vector<cv::Mat> m_gtTest;
 
-private:
-	std::vector<cv::Mat> m_cleanData;
-	std::vector<cv::Mat> m_gtCleanData;
-	std::vector<cv::Mat> m_inputData;
-	std::vector<cv::Mat> m_gtData;
+	private:
+		QString m_folderInputPath{};
+		QString m_configPath{};
+		QString m_cleanPath{};
+		QString m_gtPath{};
+		QString m_cleanTrainPath{};
+		QString m_gtTrainPath{};
+		QString m_cleanTestPath{};
+		QString m_gtTestPath{};
+		QString m_inputType{};
+		QString m_outputType{};
+		QString m_split{};
 
-private:
-	QString m_folderInput;
-	QString m_roi;
-	qint32 m_stopFrame{};
-	qint32 m_startFrame{};
-	qint32 m_startGT{};
-	qint32 m_stopGT{};
-	qint32 m_width;
-	qint32 m_height;
-	QString m_clean;
-	QString m_gt;
+	private:
+		QJsonArray m_graph;
+		std::vector<Processing*> m_block;
+		std::vector<std::vector<_data>> m_data;
+		std::vector<cv::Mat> m_outputData;
+		Graph<Processing, _data> m_graph_processing;
+		LoadData m_loadData;
+		std::vector<struct image_info>  m_imageInfoTrain;
+		std::vector<struct image_info>  m_imageInfoTest;
+		
+	private:
+		int m_width{};
+		int m_height{};
+		bool m_loaded{};
+		bool m_resize{};
+		bool m_savePreprocessingDataset{};
+		int m_initFrames{};
 
-private:
-	QJsonArray m_graph;
-	std::vector<Processing*> m_block;
-	std::vector<std::vector<_data>> m_data;
-	std::vector<cv::Mat> m_outputData;
-
-private:
-	QString m_inputType;
-	QString m_outputType;
-	QString m_split;
-
-	Graph<Processing, _data> m_graph_processing;
-	LoadData m_loadData;
-	std::vector<struct image_info>  m_imageInfo;
-
-	bool m_loaded{};
-	bool m_resize{};
-	bool m_savePreprocessingDataset{};
-	QString m_pathToConfig;
-	QJsonObject m_datasetConfig;
-	QString m_cleanTrain{};
-	QString m_gtTrain{};
-	int m_trainNumber{};
+		int m_startTrain{};
+		int m_stopTrain{};
+		int m_startTest{};
+		int m_stopTest{};
 
 };
 

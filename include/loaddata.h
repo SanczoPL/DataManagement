@@ -62,13 +62,14 @@ public:
 	void configure(QJsonObject const& a_config);
 
 private:
+	void createSplit();
 	#ifdef __linux__
 		void loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv::Mat>& m_cleanData, bool resize);
 		void loadDataLinux(std::vector<cv::Mat> &data, std::vector<cv::Mat> &gt);
 	#endif // _UNIX
 
 	#ifdef _WIN32
-		void loadDataFromStreamWindows(QString path, std::vector<cv::Mat> &data, bool resize);
+		void loadDataFromStreamWindows(QString path, std::vector<cv::Mat> &data, int framesNumber);
 		void loadDataWindows(std::vector<cv::Mat> &data, std::vector<cv::Mat> &gt);
 	#endif // _WIN32
 
@@ -77,21 +78,26 @@ private:
 	cv::VideoCapture m_videoFromFile;
 	cv::VideoCapture m_videoFromFileGT;
 	#endif // _UNIX
+	
+private:
+	QString m_folderInputPath{};
+	QString m_configPath{};
+	QString m_cleanPath{};
+	QString m_gtPath{};
+	QString m_cleanTrainPath{};
+	QString m_gtTrainPath{};
+	QString m_cleanTestPath{};
+	QString m_gtTestPath{};
+	QString m_inputType{};
+	QString m_outputType{};
+	QString m_split{};
 
 private:
-	QString m_data;
-	QString m_gt;
-	QString m_inputType;
-	QString m_outputType;
-	QString m_split;
-	QString m_cleanTrain{};
-	QString m_gtTrain{};
-	QString m_pathToConfig;
-	
-	int m_stopFrame{};
-	int m_startFrame{};
-	int m_startGT{};
-	int m_stopGT{};
+	int m_startTrain{};
+	int m_stopTrain{};
+	int m_startTest{};
+	int m_stopTest{};
+	int m_allFrames{};
 	
 private:
 	QJsonObject m_datasetConfig;
