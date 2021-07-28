@@ -151,8 +151,8 @@ void LoadData::loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv
 
 void LoadData::loadDataLinux(std::vector<cv::Mat> &data, std::vector<cv::Mat> &gt)
 {
-	QString m_data = m_configPath + m_datasetConfig[CLEAN].toString() + m_split + m_datasetConfig[INPUT_PREFIX].toString();
-	QString m_gt = m_configPath + m_datasetConfig[GT].toString() + m_split + m_datasetConfig[INPUT_PREFIX].toString();
+	QString m_data = m_configPath + m_cleanPath + m_split + m_datasetConfig[INPUT_PREFIX].toString();
+	QString m_gt = m_configPath + m_gtPath + m_split + m_datasetConfig[INPUT_PREFIX].toString();
 	#ifdef DEBUG
 		Logger->debug("m_data:{}", m_data.toStdString());
 		Logger->debug("m_gt:{}", m_gt.toStdString());

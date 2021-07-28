@@ -64,7 +64,7 @@ public:
 private:
 	void createSplit();
 	#ifdef __linux__
-		void loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv::Mat>& m_cleanData, bool resize);
+		void loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv::Mat> &data, int framesNumber);
 		void loadDataLinux(std::vector<cv::Mat> &data, std::vector<cv::Mat> &gt);
 	#endif // _UNIX
 
