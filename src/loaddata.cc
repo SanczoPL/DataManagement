@@ -188,9 +188,9 @@ void LoadData::loadDataFromStreamWindows(QString path, std::vector<cv::Mat> &dat
 	{
 		for (qint32 iteration = 0; iteration < m_imgList.size(); iteration++)
 		{
-			if (iteration % 1000 == 0)
+			if (iteration % 100 == 0)
 			{
-				Logger->info("loadDataFromStreamWindows() loaded frames:{}", iteration);
+				Logger->trace("loadDataFromStreamWindows() loaded frames:{}", iteration);
 			}
 			QString name = path +  m_split + m_imgList[iteration] + m_inputType;
 
