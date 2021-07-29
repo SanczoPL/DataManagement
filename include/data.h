@@ -103,6 +103,7 @@ class DataMemory : public QObject
 		bool m_resize{};
 		bool m_savePreprocessingDataset{};
 		int m_initFrames{};
+		int m_zeroPadding{};
 
 		int m_startTrain{};
 		int m_stopTrain{};

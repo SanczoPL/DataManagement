@@ -1,6 +1,6 @@
 #include "data.h"
 
-//#define DEBUG
+#define DEBUG
 //#define DEBUG_PREPROCESS
 //#define DEBUG_OPENCV
 
@@ -31,6 +31,7 @@ constexpr auto INPUT_TYPE{ "InputType" };
 constexpr auto OUTPUT_TYPE{ "OutputType" };
 constexpr auto INPUT_PREFIX{ "InputPrefix" };
 constexpr auto INITIALIZATION_FRAMES{ "InitializationFrames" };
+constexpr auto ZERO_PADDING{ "ZeroPadding" };
 
 constexpr auto PATH_TO_DATASET{ "PathToDataset" };
 constexpr auto CONFIG_NAME{ "ConfigName" };
@@ -105,6 +106,8 @@ void DataMemory::loadConfig(QJsonObject const& a_config)
 	m_cleanTestPath = datasetConfig[DIR_CLEANT_TEST].toString();
 	m_gtTestPath = datasetConfig[DIR_GT_TEST].toString();
 
+	m_zeroPadding = datasetConfig[ZERO_PADDING].toInt();
+
 	checkAndCreateFolder(m_configPath + m_cleanTrainPath);
 	checkAndCreateFolder(m_configPath + m_gtTrainPath);
 	checkAndCreateFolder(m_configPath + m_cleanTestPath);
@@ -116,37 +119,45 @@ void DataMemory::loadConfig(QJsonObject const& a_config)
 	m_stopTest = datasetConfig[STOP_TEST].toInt();
 
 	#ifdef DEBUG
+	Logger->debug("DataMemory::loadConfig() m_zeroPadding:{}", m_zeroPadding);
 	Logger->debug("DataMemory::loadConfig() done");
 	#endif
 }
 
 bool DataMemory::loadNamesOfFile()
 {
-	QVector<QString> m_imgList = scanAllImages(m_configPath+m_cleanTrainPath);
+	QVector<QString> m_imgList = scanAllImages(m_configPath+m_cleanPath);
 	std::sort(m_imgList.begin(), m_imgList.end());
 	#ifdef DEBUG
 	Logger->debug("m_imgList:{}", m_imgList.size());
 	#endif
 	if (m_imgList.size() > 0)
 	{
+		int counterTrain{0};
+		int counterTest{0};
+		
 		for (qint32 iteration = 0; iteration < m_imgList.size(); iteration++)
 		{
-			if (iteration % 1000 == 0)
-			{
-				Logger->debug("DataMemory::loadNamesOfFile() file loaded{}", iteration);
-			}
-
 			QString name = m_configPath + m_cleanTrainPath + m_split + m_imgList[iteration] + m_inputType;
 			QString gt = m_configPath + m_gtTrainPath + m_split + m_imgList[iteration] + m_inputType;
+			if (iteration % 100 == 0)
+			{
+				Logger->debug("DataMemory::loadNamesOfFile() file loading:{}/{}...", iteration, m_imgList.size());
+				Logger->debug("DataMemory::loadNamesOfFile() name:{}", name.toStdString());
+				Logger->debug("DataMemory::loadNamesOfFile() gt:{}", gt.toStdString());
+			}
 			if (iteration >= m_startTrain && iteration < m_stopTrain)
 			{
 				m_imageInfoTrain.push_back({ name.toStdString(), gt.toStdString() });
+				counterTrain++;
 			}
 			else if (iteration >= m_startTest && iteration < m_stopTest)
 			{
 				m_imageInfoTest.push_back({ name.toStdString(), gt.toStdString() });
+				counterTest++;
 			}
 		}
+		Logger->info("DataMemory::loadNamesOfFile() file loaded:{}, train:{} test:{}", m_imgList.size(), counterTrain, counterTest);
 	}
 	else
 	{
@@ -251,33 +262,34 @@ bool DataMemory::preprocess(QJsonArray dataGraph)
 
 	if(m_savePreprocessingDataset)
 	{
+		Logger->trace("DataMemory::preprocess() savePreprocessingDataset");
 		for(int i = 0 ; i < m_cleanTrain.size() ; i++)
 		{
-			QString pathToSaveClean = m_configPath + m_cleanTrainPath +  m_split + QString::number(i) + m_outputType;
-			QString pathToSaveGt = m_configPath + m_gtTrainPath + m_split + QString::number(i) + m_outputType;
+			QString number = QString("%1").arg(i,m_zeroPadding, 10, QChar('0')); 
+			QString pathToSaveClean = m_configPath + m_cleanTrainPath +  m_split + number + m_outputType;
+			QString pathToSaveGt = m_configPath + m_gtTrainPath + m_split + number + m_outputType;
+			Logger->trace("DataMemory::preprocess() pathToSaveClean:{}", pathToSaveClean.toStdString());
+			Logger->trace("DataMemory::preprocess() pathToSaveGt:{}", pathToSaveGt.toStdString());
 			cv::imwrite(pathToSaveClean.toStdString(), m_cleanTrain[i]);
 			cv::imwrite(pathToSaveGt.toStdString(), m_gtTrain[i]);
 		}
 		for(int i = 0 ; i < m_cleanTest.size() ; i++)
 		{
-			QString pathToSaveClean = m_configPath + m_cleanTestPath +  m_split + QString::number(i) + m_outputType;
-			QString pathToSaveGt = m_configPath + m_gtTestPath + m_split + QString::number(i) + m_outputType;
+			QString number = QString("%1").arg(i, m_zeroPadding, 10, QChar('0')); 
+			QString pathToSaveClean = m_configPath + m_cleanTestPath +  m_split + number + m_outputType;
+			QString pathToSaveGt = m_configPath + m_gtTestPath + m_split + number + m_outputType;
 			cv::imwrite(pathToSaveClean.toStdString(), m_cleanTest[i]);
 			cv::imwrite(pathToSaveGt.toStdString(), m_gtTest[i]);
 		}
 	}
 
 	#ifdef DEBUG
-	Logger->debug("DataMemory::preprocess() sizes: m_clean:{}, m_gt{}", m_clean.size(), m_gt.size());
-	Logger->debug("DataMemory::preprocess() sizes: m_cleanTrain:{}, m_gtData{}", m_cleanTrain.size(), m_gtData.size());
+		Logger->debug("DataMemory::preprocess() sizes: m_clean:{}, m_gt{}", m_clean.size(), m_gt.size());
+		Logger->debug("DataMemory::preprocess() sizes: m_cleanTrain.size:{}, ({}x{}) ", 
+			m_cleanTrain.size(), m_cleanTrain[0].cols, m_cleanTrain[0].rows);
 	#endif
-
-	
-	Logger->debug("DataMemory::preprocess() sizes: m_cleanTrain.size:{}, ({}x{}) ", m_cleanTrain.size(), m_cleanTrain[0].cols, m_cleanTrain[0].rows);
 	m_loaded = true;
 	
-	
-		
 	emit(memoryLoaded());
 	return true;
 }
