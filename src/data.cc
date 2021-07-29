@@ -1,6 +1,6 @@
 #include "data.h"
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUG_PREPROCESS
 //#define DEBUG_OPENCV
 
