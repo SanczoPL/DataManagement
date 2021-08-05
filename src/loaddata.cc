@@ -190,7 +190,7 @@ void LoadData::loadDataFromStreamWindows(QString path, std::vector<cv::Mat> &dat
 		{
 			if (iteration % 100 == 0)
 			{
-				Logger->trace("loadDataFromStreamWindows() loaded frames:{}", iteration);
+				Logger->debug("loadDataFromStreamWindows() loaded frames:{}", iteration);
 			}
 			QString name = path +  m_split + m_imgList[iteration] + m_inputType;
 
@@ -199,7 +199,7 @@ void LoadData::loadDataFromStreamWindows(QString path, std::vector<cv::Mat> &dat
 
 			if(iteration > framesNumber)
 			{
-				Logger->info("LoadData::loadDataFromStreamWindows() stop loading on:{} frame", iteration);
+				Logger->debug("LoadData::loadDataFromStreamWindows() stop loading on:{} frame", iteration);
 				break;
 			}
 		}
