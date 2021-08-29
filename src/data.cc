@@ -126,6 +126,9 @@ void DataMemory::loadConfig(QJsonObject const& a_config)
 
 bool DataMemory::loadNamesOfFile()
 {
+	m_imageInfoTest.clear();
+	m_imageInfoTrain.clear();
+	
 	QVector<QString> m_imgList = scanAllImages(m_configPath+m_cleanPath);
 	std::sort(m_imgList.begin(), m_imgList.end());
 	#ifdef DEBUG
