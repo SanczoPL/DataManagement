@@ -55,6 +55,9 @@ class DataMemory : public QObject
 		cv::Mat gtTrain(int i) { return m_gtTrain[i]; }
 		cv::Mat cleanTrain(int i) { return m_cleanTrain[i]; }
 
+		cv::Mat gtTest(int i) { return m_gtTest[i]; }
+		cv::Mat cleanTest(int i) { return m_cleanTest[i]; }
+
 	private:
 		void loadDataFromStream(cv::VideoCapture videoFromFile, std::vector<cv::Mat>& m_cleanData, bool resize);
 		void loadConfig(QJsonObject const& a_config);
